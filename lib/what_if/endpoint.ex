@@ -1,7 +1,7 @@
 defmodule WhatIf.Endpoint do
   use Phoenix.Endpoint, otp_app: :what_if
 
-  socket "/socket", WhatIf.UserSocket
+  socket "/s", WhatIf.UserSocket
 
   # Serve at "/" the static files from "priv/static" directory.
   #

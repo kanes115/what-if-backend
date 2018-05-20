@@ -4,7 +4,7 @@ defmodule WhatIf.Router do
   import Joken
 
   pipeline :browser do
-    plug :accepts, ["html"]
+    #plug :accepts, ["html", "json"]
     plug :fetch_session
     plug :fetch_flash
     plug :protect_from_forgery
@@ -21,7 +21,9 @@ defmodule WhatIf.Router do
 
     get "/", PageController, :index, private: %{joken_skip: true}
 
-    get "/test", PageController, :index
+    get "/test", PageController, :test, private: %{joken_skip: true}
+
+    post "/display-name", PageController, :set_display_name, private: %{joken_skip: true}
   end
 
   def verify_function() do
