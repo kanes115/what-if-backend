@@ -13,7 +13,7 @@ TODO Descritpion here
 ### Docker compose
 First you need to set up your database. Type in terminal:
 ```
-$ docker-compose up
+$ docker-compose up -d
 ```
 and then, everytime you need to start your database container (and other services in the future) type:
 ```
