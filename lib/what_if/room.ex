@@ -13,6 +13,10 @@ defmodule WhatIf.Room do
     {:ok, %__MODULE__{name: name}}
   end
 
+  def get_name(pid) do
+    GenServer.call(pid, :get_name)
+  end
+
   @impl true
   def handle_call({:add_user, user}, _from, state) do
     new_state = %{state | users: state.users ++ [user]}
