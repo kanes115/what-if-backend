@@ -10,10 +10,13 @@ defmodule WhatIf.LobbyChannel do
     end
   end
 
-  def handle_in("crete_room", %{"name" => name}, socket) do
-    spec = %{id: name, start: {WhatIf.Room, :start_link, [name]}}
-    {:ok, _pid} = DynamicSupervisor.start_child(WhatIf.RoomsSupervisor, spec) # here case needed
-    #broadcast! socket, "new_msg", %{body: body}
+  def handle_in("create_room", %{"name" => name}, socket) do
+    case WhatIf.RoomsManager.add_room(name) do
+      {:error, reason} ->
+        push socket, "error", %{"reason" => reason}
+      :ok ->
+        push socket, "ok", %{}
+    end
     {:noreply, socket}
   end
 
