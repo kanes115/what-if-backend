@@ -2,6 +2,7 @@ defmodule WhatIf.UserSocket do
   use Phoenix.Socket
 
   ## Channels
+  channel "lobby:*", WhatIf.LobbyChannel
   channel "room:*", WhatIf.RoomChannel
 
   ## Transports
@@ -19,19 +20,8 @@ defmodule WhatIf.UserSocket do
   #
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
-  def connect(s, socket) do
-    {:ok, socket}
-    #user_id = get_user_id(token)
-    #case WhatIf.User.exists?(user_id) do
-    #  true ->
-    #    {:ok, assign(socket, :user_id, get_user_id(token))}
-    #  _ ->
-    #    {:error, %{reason: "User not fully registered"}}
-    #end
-  end
-
-  def get_user_id(token) do
-    "some user id"
+  def connect(%{"token" => token}, socket) do
+    {:ok, assign(socket, :user_id, WhatIf.User.get_user_id(token))}
   end
 
   # Socket id's are topics that allow you to identify all sockets for a given user:

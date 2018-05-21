@@ -1,7 +1,7 @@
 defmodule WhatIf.User do
   use Ecto.Schema
 
-  alias FileFlow.Repo
+  alias WhatIf.Repo
 
   @primary_key {:user_id, :string, autogenerate: false}
   schema "users" do
@@ -29,6 +29,8 @@ defmodule WhatIf.User do
   def get_all do
     __MODULE__ |> WhatIf.Repo.all
   end
+
+  def get_user_id(token), do: token
 
   def get_user(email) do
     Repo.get_by(WhatIf.User, email: email)
