@@ -14,7 +14,8 @@ defmodule WhatIf do
       supervisor(WhatIf.Endpoint, []),
       # Start your own worker by calling: WhatIf.Worker.start_link(arg1, arg2, arg3)
       # worker(WhatIf.Worker, [arg1, arg2, arg3]),
-      {DynamicSupervisor, name: WhatIf.RoomsSupervisor, strategy: :one_for_one}
+      {DynamicSupervisor, name: WhatIf.RoomsSupervisor, strategy: :one_for_one},
+      worker(WhatIf.RoomsManager, [])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html

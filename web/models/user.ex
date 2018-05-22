@@ -30,7 +30,9 @@ defmodule WhatIf.User do
     __MODULE__ |> WhatIf.Repo.all
   end
 
-  def get_user_id(token), do: token
+  def get_user_id(token), do: token # to implements
+
+  def get_user_by_id(id), do: id # to implemment
 
   def get_user(email) do
     Repo.get_by(WhatIf.User, email: email)

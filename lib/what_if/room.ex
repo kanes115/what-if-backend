@@ -17,6 +17,19 @@ defmodule WhatIf.Room do
     GenServer.call(pid, :get_name)
   end
 
+  def delete_room(pid) do
+    GenServer.stop(pid, :normal)
+  end
+
+  def add_user(pid, user) do
+    GenServer.call(pid, {:add_user, user})
+  end
+
+  @impl true
+  def terminate(normal, _) do
+    :ok
+  end
+
   @impl true
   def handle_call({:add_user, user}, _from, state) do
     new_state = %{state | users: state.users ++ [user]}
