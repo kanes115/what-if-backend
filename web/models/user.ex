@@ -32,10 +32,14 @@ defmodule WhatIf.User do
 
   def get_user_id(token), do: token # to implements
 
-  def get_user_by_id(id), do: id # to implemment
+  def get_user_by_id(id) do
+    Repo.get_by(__MODULE__, user_id: id)
+  end
 
   def get_user(email) do
-    Repo.get_by(WhatIf.User, email: email)
+    Repo.get_by(__MODULE__, email: email)
   end
+
+  def in_room?(user), do: false # todo
 
 end

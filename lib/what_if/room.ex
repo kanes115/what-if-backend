@@ -1,8 +1,8 @@
 defmodule WhatIf.Room do
   use GenServer
 
-  @enforce_keys [:name]
-  defstruct [:name, {:users, []}]
+  @enforce_keys [:room_name]
+  defstruct [:room_name, {:users, []}]
 
   def start_link(name) do
     GenServer.start_link(__MODULE__, name)
@@ -10,7 +10,7 @@ defmodule WhatIf.Room do
 
   @impl true
   def init(name) do
-    {:ok, %__MODULE__{name: name}}
+    {:ok, %__MODULE__{room_name: name}}
   end
 
   def get_name(pid) do
@@ -35,7 +35,7 @@ defmodule WhatIf.Room do
     new_state = %{state | users: state.users ++ [user]}
     {:reply, :ok, new_state}
   end
-  def handle_call(:get_name, _from, %{name: name} = state), do: {:reply, name, state}
+  def handle_call(:get_name, _from, %{room_name: name} = state), do: {:reply, name, state}
 
   @impl true
   def handle_cast({:push, item}, state) do

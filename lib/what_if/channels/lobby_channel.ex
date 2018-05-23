@@ -34,17 +34,5 @@ defmodule WhatIf.LobbyChannel do
     end
     {:noreply, socket}
   end
-  def handle_in("join_room", %{"name" => room_name}, socket) do
-    user_id = WhatIf.User.get_user_id(socket.assigns.user_id)
-    user = WhatIf.User.get_user_by_id(user_id)
-    case WhatIf.RoomsManager.get_room_by_name(room_name) do
-      {:ok, pid} ->
-        WhatIf.Room.add_user(pid, user)
-        push socket, "joined", %{"name" => room_name}
-      {:error, reason} ->
-        push socket, "error_while_joining", %{"name" => room_name, "reason" => reason}
-    end
-    {:noreply, socket}
-  end
-
+  
 end
