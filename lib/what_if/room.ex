@@ -10,11 +10,6 @@ defmodule WhatIf.Room do
     GenServer.start_link(__MODULE__, name)
   end
 
-  @impl true
-  def init(name) do
-    {:ok, %__MODULE__{room_name: name}}
-  end
-
   def get_name(pid) do
     GenServer.call(pid, :get_name)
   end
@@ -31,6 +26,13 @@ defmodule WhatIf.Room do
     GenServer.call(pid, {:delete_user, user_id})
   end
 
+  ## GenServer callbacks
+
+  @impl true
+  def init(name) do
+    {:ok, %__MODULE__{room_name: name}}
+  end
+  
   @impl true
   def terminate(:normal, %{room_name: name}) do
     inform_users(name, "Room was deleted")
@@ -45,7 +47,7 @@ defmodule WhatIf.Room do
     {:reply, :ok, new_state}
   end
   def handle_call(:get_name, _from, %{room_name: name} = state), do: {:reply, name, state}
-  def handle_call({:delete_user, to_del}, _from, %{room_name: name, users: users} = state) do
+  def handle_call({:delete_user, to_del}, _from, %{users: users} = state) do
     case user_in_room?(to_del, users) do
       true ->
         remove_room_if_empty(users, %{ state | users: remove_user(to_del, users)})
@@ -54,13 +56,10 @@ defmodule WhatIf.Room do
     end
   end
 
-  defp remove_room_if_empty([], _), do: {:stop, :normal, nil}
-  defp remove_room_if_empty(_, new_state), do: {:reply, :ok, nil}
+  ## Helpers
 
-  @impl true
-  def handle_cast({:push, item}, state) do
-    {:noreply, [item | state]}
-  end
+  defp remove_room_if_empty([], _), do: {:stop, :normal, nil}
+  defp remove_room_if_empty(_, new_state), do: {:reply, :ok, new_state}
 
   defp remove_user(user_id, users) do
     users

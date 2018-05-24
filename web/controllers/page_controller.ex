@@ -29,9 +29,9 @@ defmodule WhatIf.PageController do
     changeset = 
       WhatIf.User.registration_changeset(%WhatIf.User{}, %{display_name: name, user_id: user_id})
     case Repo.insert(changeset) do
-      {:ok, user} ->
+      {:ok, _user} ->
         conn
-      {:error, changeset} ->
+      {:error, _changeset} ->
         IO.inspect("Error at inserting to db")
     end
 
