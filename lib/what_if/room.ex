@@ -26,6 +26,10 @@ defmodule WhatIf.Room do
     GenServer.call(pid, {:delete_user, user_id})
   end
 
+  def get_users(pid) do
+    GenServer.call(pid, :get_users)
+  end
+
   ## GenServer callbacks
 
   @impl true
@@ -54,6 +58,10 @@ defmodule WhatIf.Room do
       false ->
         {:reply, {:error, :not_in_room}, users}
     end
+  end
+  def handle_call(:get_users, _from, %{users: users} = state) do
+    users_names = users |> Enum.map(fn %{display_name: name} -> name end)
+    {:reply, users_names, state}
   end
 
   ## Helpers

@@ -20,8 +20,7 @@ defmodule WhatIf.LobbyChannel do
     {:noreply, socket}
   end
   def handle_in("get_rooms", %{}, socket) do
-    rooms = WhatIf.RoomsManager.get_all_rooms()
-            |> Enum.map(fn {name, _pid} -> name end)
+    rooms = WhatIf.RoomsManager.get_all_rooms_names()
     push socket, "rooms_list", %{"rooms" => rooms}
     {:noreply, socket}
   end

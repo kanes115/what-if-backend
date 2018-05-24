@@ -11,6 +11,10 @@ defmodule WhatIf.RoomsManager do
     GenServer.call(__MODULE__, :get_all_rooms)
   end
 
+  def get_all_rooms_names() do
+    GenServer.call(__MODULE__, :get_all_rooms_names)
+  end
+
   @spec add_room(String.t) :: {:error, :exists} | :ok
   def add_room(name) do
     case room_exists?(name) do
@@ -44,6 +48,10 @@ defmodule WhatIf.RoomsManager do
 
   def handle_call(:get_all_rooms, _from, rooms) do
     {:reply, rooms, rooms}
+  end
+  def handle_call(:get_all_rooms_names, _from, rooms) do
+    room_names = rooms |> Enum.map(fn %{room_name: name} -> name end)
+    {:reply, room_names, rooms}
   end
   def handle_call({:add_room, name}, _from, rooms) do
     spec = %{id: name, start: {WhatIf.Room, :start_link, [name]}}
