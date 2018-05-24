@@ -20,6 +20,19 @@ defmodule WhatIf.RoomChannel do
     {:ok, socket}
   end
 
+  def handle_in("leave_room", %{}, %{topic: "room_name:" <> room_name} = socket) do
+    room = RoomsManager.get_room_by_name(room_name)
+    user_id = socket.assigns.user_id
+    case Room.delete_user(room, user_id) do
+      :ok ->
+        broadcast! socket, "user_left", %{"user" => User.get_user_by_id(user_id)}
+      {:error, reason} ->
+        push socket, "error_leaving", %{"user" => User.get_user_by_id(user_id),
+          "reason" => reason}
+    end
+    {:ok, socket}
+  end
+
   defp can_join?(user) do
     case User.in_room?(user) do
       false ->
