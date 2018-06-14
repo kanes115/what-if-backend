@@ -26,28 +26,57 @@ defmodule WhatIf.Room do
 
   def get_questions(pid), do: GenServer.call(pid, :get_questions)
 
+  def game_started?(pid), do: GenServer.call(pid, :started?)
+
+  def submit_answers(pid, q_and_a, user_id) do
+    GenServer.call(pid, {:submit_answers, q_and_a, user_id})
+  end
+
   ## GenServer callbacks
 
   @impl true
   def init(name) do
+    IO.inspect "Starting room #{inspect(name)}"
     {:ok, %__MODULE__{room_name: name}}
   end
 
   @impl true
   def terminate(:normal, %{room_name: name}) do
+    IO.inspect "Stopping room #{inspect(name)} (normally)"
     inform_users(name, "Room was deleted")
   end
   def terminate(_reason, %{room_name: name}) do
+    IO.inspect "Stopping room #{inspect(name)} (abnormally)"
     inform_users(name, "Internal error")
   end
 
   @impl true
+  def handle_call({:submit_answers, q_and_a, user_id}, _from, %{users: users} = state) do
+    new_users = users |> Enum.map(fn %{user: user} = entry ->
+      case user.user_id do
+        ^user_id ->
+          %{entry | q_and_a: q_and_a}
+        e -> entry
+      end
+    end)
+    case game_finished?(new_users) do
+      false ->
+        {:reply, {:ok, :game_not_finished}, %{users: new_users}}
+      true ->
+        {:reply, {:ok, :game_finished, get_all_q_and_as(new_users)}, %{users: new_users}}
+    end
+  end
+  def handle_call(:started?, _from, state) do
+    {:reply, state.started?, state}
+  end
   def handle_call({:add_user, user}, _from, state) do
-    new_state = %{state | users: state.users ++ [%{ready?: false, user: user}]}
+    IO.inspect "Adding user #{inspect(user)} to room #{inspect(state.room_name)}"
+    new_state = %{state | users: state.users ++ [%{q_and_a: nil, ready?: false, user: user}]}
     {:reply, :ok, new_state}
   end
   def handle_call(:get_name, _from, %{room_name: name} = state), do: {:reply, name, state}
   def handle_call({:delete_user, to_del}, _from, %{users: users} = state) do
+    IO.inspect "Deleting user #{inspect(to_del)} from room #{inspect(state.room_name)}"
     case user_in_room?(to_del, users) do
       true ->
         remove_room_if_empty(users, %{ state | users: remove_user(to_del, users)})
@@ -61,6 +90,7 @@ defmodule WhatIf.Room do
     {:reply, users_names, state}
   end
   def handle_call({:set_user_ready, user_id}, _from, %{users: users, started?: false} = state) do
+    IO.inspect "Setting user #{inspect(user_id)} ready in room #{inspect(state.room_name)}"
     new_users = users |> Enum.map(fn %{user: %{user_id: ^user_id}} = entry -> 
       %{entry | ready?: true}
       u -> u end)
@@ -71,17 +101,30 @@ defmodule WhatIf.Room do
         {:reply, {:ok, :game_started}, %{state | users: new_users, started?: true}}
     end
   end
-  def handle_call({:add_question, question}, _from, %{questions: questions, started?: false} = state) do
+  def handle_call({:add_question, question}, _from, 
+                  %{questions: questions, started?: false} = state) do
+    IO.inspect "Adding question #{inspect(question)} to room #{inspect(state.room_name)}"
     case state.started? do
       false ->
         {:reply, :ok, %{state | questions: questions ++ [question]}}
       true ->
+        IO.inspect "... but game has already started"
         {:reply, {:error, :game_already_started}, state}
     end
   end
   def handle_call(:get_questions, _from, %{questions: q} = state), do: {:reply, q, state}
 
   ## Helpers
+  #
+  defp game_finished?(users) do
+    users
+    |> Enum.all?(fn %{q_and_a: e} -> e !== nil end)
+  end
+
+  def get_all_q_and_as(users) do
+    users
+    |> Enum.map(fn %{q_and_a: a} -> a end)
+  end
 
   defp remove_room_if_empty([], _), do: {:stop, :normal, nil}
   defp remove_room_if_empty(_, new_state), do: {:reply, :ok, new_state}

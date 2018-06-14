@@ -74,6 +74,23 @@ defmodule WhatIf.RoomChannel do
     push socket, "question_list", %{"questions" => questions}
     {:noreply, socket}
   end
+  def handle_in("finish_game", %{"game" => q_and_a}, socket) do
+    res = socket
+    |> get_room_pid()
+    |> Room.submit_answers(q_and_a, socket.assigns.user_id)
+    case res do
+      {:error, _} ->
+        push socket, "error", %{"reason" => ""}
+      {:ok, :game_not_finished} ->
+        broadcast! socket, "player_finished", %{"user_id" => socket.assigns.user_id,
+                                               "game_finished" => false}
+      {:ok, :game_finished, final_q_and_a} ->
+        broadcast! socket, "player_finished", %{"user_id" => socket.assigns.user_id,
+                                               "game_finished" => true,
+                                               "q_and_a" => final_q_and_a}
+    end
+    {:noreply, socket}
+  end
 
 
   defp get_room_name(%{topic: "room:" <> room_name}), do: room_name

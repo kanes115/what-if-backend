@@ -20,7 +20,7 @@ defmodule WhatIf.LobbyChannel do
     {:noreply, socket}
   end
   def handle_in("get_rooms", %{}, socket) do
-    rooms = WhatIf.RoomsManager.get_all_rooms_names()
+    rooms = WhatIf.RoomsManager.get_all_nonstarted_rooms_names()
     push socket, "rooms_list", %{"rooms" => rooms}
     {:noreply, socket}
   end

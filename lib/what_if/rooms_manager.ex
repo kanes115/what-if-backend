@@ -11,6 +11,11 @@ defmodule WhatIf.RoomsManager do
     GenServer.call(__MODULE__, :get_all_rooms)
   end
 
+  def get_all_nonstarted_rooms_names() do
+    GenServer.call(__MODULE__, :get_all_nonstarted_rooms)
+    |> Enum.map(fn %{room_name: name} -> name end)
+  end
+
   def get_all_rooms_names() do
     GenServer.call(__MODULE__, :get_all_rooms_names)
   end
@@ -48,6 +53,10 @@ defmodule WhatIf.RoomsManager do
 
   def handle_call(:get_all_rooms, _from, rooms) do
     {:reply, rooms, rooms}
+  end
+  def handle_call(:get_all_nonstarted_rooms, _from, rooms) do
+    available_rooms = rooms |> Enum.filter(fn %{pid: pid} -> not Room.game_started?(pid) end)
+    {:reply, available_rooms, rooms}
   end
   def handle_call(:get_all_rooms_names, _from, rooms) do
     room_names = rooms |> Enum.map(fn %{room_name: name} -> name end)
