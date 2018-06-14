@@ -60,7 +60,7 @@ defmodule WhatIf.Room do
       %{"user" => u.display_name, "user_id" => u.user_id, "ready" => ready?} end)
     {:reply, users_names, state}
   end
-  def handle_call({:set_user_ready, user_id}, _from, %{users: users} = state) do
+  def handle_call({:set_user_ready, user_id}, _from, %{users: users, started?: false} = state) do
     new_users = users |> Enum.map(fn %{user: %{user_id: ^user_id}} = entry -> 
       %{entry | ready?: true}
       u -> u end)
@@ -71,7 +71,7 @@ defmodule WhatIf.Room do
         {:reply, {:ok, :game_started}, %{state | users: new_users, started?: true}}
     end
   end
-  def handle_call({:add_question, question}, _from, %{questions: questions} = state) do
+  def handle_call({:add_question, question}, _from, %{questions: questions, started?: false} = state) do
     case state.started? do
       false ->
         {:reply, :ok, %{state | questions: questions ++ [question]}}
