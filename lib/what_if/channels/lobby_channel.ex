@@ -6,7 +6,7 @@ defmodule WhatIf.LobbyChannel do
       true ->
         {:ok, socket}
       false ->
-        {:error, %{reason: "User not registered"}}
+        {:error, %{reason: "User not registered", code: 401}}
     end
   end
 
