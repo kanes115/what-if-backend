@@ -39,7 +39,7 @@ defmodule WhatIf.Mixfile do
      {:gettext, "~> 0.11"},
      {:cowboy, "~> 1.0"},
      {:joken, "~> 1.1"},
-     {:libsodium, "~> 0.0.10"},
+     #{:libsodium, "~> 0.0.10"},
      #     {:keccakf1600, "~> 0.0.1"},
      {:libdecaf, "~> 0.0.1"},
      {:distillery, "~> 1.5", runtime: false},
