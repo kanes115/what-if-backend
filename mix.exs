@@ -40,7 +40,7 @@ defmodule WhatIf.Mixfile do
      {:cowboy, "~> 1.0"},
      {:joken, "~> 1.1"},
      {:libsodium, "~> 0.0.10"},
-     {:keccakf1600, "~> 0.0.1"},
+     #     {:keccakf1600, "~> 0.0.1"},
      {:libdecaf, "~> 0.0.1"},
      {:cors_plug, "~> 1.5"}]
   end
