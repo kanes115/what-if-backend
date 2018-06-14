@@ -64,6 +64,7 @@ defmodule WhatIf.RoomChannel do
         push socket, "error", %{"reason" => "game has already started"}
       _ ->
         broadcast! socket, "new_question", body
+    end
     {:noreply, socket}
   end
   def handle_in("get_questions", %{}, socket) do
