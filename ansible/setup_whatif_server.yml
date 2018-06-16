@@ -5,6 +5,10 @@
 - hosts: whatif
   become: yes
   pre_tasks:
+      - name: include MongooseIM variables
+        include_vars:
+            file: "{{ playbook_dir }}/vars/deploy_config.yml"
+            name: deploy_config
       - name:    Install prerequisites
         apt:     name={{item}} update_cache=yes
         with_items:
@@ -34,11 +38,11 @@
       - name: build image
         docker_image:
             name: server_image
-            tag: ex1
+            tag: "{{ deploy_config.image_tag }}"
             path: /docker
       - name: Re-create a server container
         docker_container:
             name: whatif_server
-            image: server_image:ex1
-            state: present
+            image: "server_image:{{ deploy_config.image_tag }}"
+            state: started
             recreate: yes

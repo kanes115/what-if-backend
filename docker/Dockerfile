@@ -2,6 +2,8 @@ FROM phusion/baseimage
 
 ENV VSN=master \
     BUILD_DEPS="git make gcc wget erlang-dev erlang-parsetools elixir npm" \
+    PORT="80" \
+    HOST="ec2-18-219-114-131.us-east-2.compute.amazonaws.com" \
     RELEASE_PATH=/usr/lib/what-if-backend
 
 ADD prod.secret.exs /prod.secret.exs
@@ -33,7 +35,6 @@ RUN curl -O https://packages.erlang-solutions.com/erlang-solutions_1.0_all.deb &
     apt-get purge -y --auto-remove $BUILD_DEPS
 
 EXPOSE 80
-EXPOSE 4000
 
 ADD run.sh /run.sh
 
