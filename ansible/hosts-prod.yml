@@ -1,0 +1,4 @@
+all:
+  children:
+    whatif:
+      hosts: { TAI-server: null }

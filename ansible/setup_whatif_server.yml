@@ -1,0 +1,44 @@
+###########################
+# Run from project root
+###########################
+
+- hosts: whatif
+  become: yes
+  pre_tasks:
+      - name:    Install prerequisites
+        apt:     name={{item}} update_cache=yes
+        with_items:
+            - apt-transport-https
+            - ca-certificates
+            - curl
+            - software-properties-common
+      - name: Install Docker
+        apt: name=docker-ce
+      - apt:
+            name: python-pip
+            state: latest
+      - name: Install docker-py
+        pip:
+            name: docker-py
+  tasks:
+      - name: Create directory for docker image files
+        file: path=/docker state=directory
+      - name: Copy docker folder
+        copy:
+            src: "{{ item }}"
+            dest: /docker/
+            owner: root
+            mode: 600
+        with_fileglob:
+            - "{{ playbook_dir }}/../docker/*"
+      - name: build image
+        docker_image:
+            name: server_image
+            tag: ex1
+            path: /docker
+      - name: Re-create a server container
+        docker_container:
+            name: whatif_server
+            image: server_image:ex1
+            state: present
+            recreate: yes

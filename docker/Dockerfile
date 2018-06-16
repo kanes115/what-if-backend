@@ -33,6 +33,7 @@ RUN curl -O https://packages.erlang-solutions.com/erlang-solutions_1.0_all.deb &
     apt-get purge -y --auto-remove $BUILD_DEPS
 
 EXPOSE 80
+EXPOSE 4000
 
 ADD run.sh /run.sh
 
