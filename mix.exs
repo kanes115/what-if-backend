@@ -41,7 +41,7 @@ defmodule WhatIf.Mixfile do
      {:joken, "~> 1.1"},
      #{:libsodium, "~> 0.0.10"},
      #     {:keccakf1600, "~> 0.0.1"},
-     #{:libdecaf, "~> 0.0.1"},
+     {:libdecaf, "~> 0.0.1"},
      {:distillery, "~> 1.5", runtime: false},
      {:cors_plug, "~> 1.5"}]
   end
