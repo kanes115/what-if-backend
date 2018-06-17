@@ -10,7 +10,7 @@ config :what_if, WhatIf.Endpoint,
 config :logger, level: :warn
 
 # Configure your database
-config :what_if, HelloPhoenix.Repo,
+config :what_if, WhatIf.Repo,
   adapter: Ecto.Adapters.Postgres,
   username: "postgres",
   password: "",
