@@ -19,7 +19,7 @@ defmodule WhatIf.Mixfile do
   def application do
     [mod: {WhatIf, []},
      applications: [:phoenix, :phoenix_pubsub, :phoenix_html, :cowboy, :logger, :gettext,
-                    :phoenix_ecto, :postgrex, :cors_plug, :joken, :libdecaf]]
+                    :phoenix_ecto, :postgrex, :cors_plug, :joken]]
   end
 
   # Specifies which paths to compile per environment.
@@ -41,7 +41,7 @@ defmodule WhatIf.Mixfile do
      {:joken, "~> 1.1"},
      #{:libsodium, "~> 0.0.10"},
      #     {:keccakf1600, "~> 0.0.1"},
-     {:libdecaf, "~> 0.0.1"},
+     #{:libdecaf, "~> 0.0.1"},
      {:distillery, "~> 1.5", runtime: false},
      {:cors_plug, "~> 1.5"}]
   end
