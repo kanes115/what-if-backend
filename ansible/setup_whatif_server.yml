@@ -2,6 +2,14 @@
 # Run from project root
 ###########################
 
+- hosts: 127.0.0.1
+  connection: local
+  tasks:
+      - name: Copy prod.exs to docker dir
+        copy:
+            src: "{{ playbook_dir }}/../config/prod.exs"
+            dest: "{{ playbook_dir }}/../docker/"
+
 - hosts: whatif
   become: yes
   pre_tasks:
@@ -35,6 +43,16 @@
             mode: 600
         with_fileglob:
             - "{{ playbook_dir }}/../docker/*"
+      - name: stop and remove containers
+        docker_container:
+            name: whatif_server
+            state: absent
+      - name: remove old image
+        docker_image:
+            name: server_image
+            tag: "{{ deploy_config.image_tag }}"
+            path: /docker
+            state: absent
       - name: build image
         docker_image:
             name: server_image
