@@ -64,3 +64,4 @@
             image: "server_image:{{ deploy_config.image_tag }}"
             state: started
             recreate: yes
+            published_ports: 80:80
