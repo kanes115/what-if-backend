@@ -17,10 +17,6 @@ config :what_if, WhatIf.Endpoint,
   server: true,
   cache_static_manifest: "priv/static/manifest.json"
 
-config :what_if, Phoenix.Transports.WebSocket,
-  check_origin: false,
-  transport_log: true
-
 # Do not print debug messages in production
 config :logger, level: :info
 
