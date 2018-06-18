@@ -13,6 +13,7 @@ use Mix.Config
 # which you typically run after static files are built.
 config :what_if, WhatIf.Endpoint,
   http: [port: "80"],
+  url: [host: "ec2-18-219-114-131.us-east-2.compute.amazonaws.com", port: 80],
   server: true,
   cache_static_manifest: "priv/static/manifest.json"
 
