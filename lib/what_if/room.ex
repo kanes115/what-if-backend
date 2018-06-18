@@ -61,9 +61,9 @@ defmodule WhatIf.Room do
     end)
     case game_finished?(new_users) do
       false ->
-        {:reply, {:ok, :game_not_finished}, %{users: new_users}}
+        {:reply, {:ok, :game_not_finished}, %{state | users: new_users}}
       true ->
-        {:reply, {:ok, :game_finished, get_all_q_and_as(new_users)}, %{users: new_users}}
+        {:reply, {:ok, :game_finished, get_all_q_and_as(new_users)}, %{state | users: new_users}}
     end
   end
   def handle_call(:started?, _from, state) do
