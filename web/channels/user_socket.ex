@@ -7,7 +7,6 @@ defmodule WhatIf.UserSocket do
 
   ## Transports
   transport :websocket, Phoenix.Transports.WebSocket,
-    timeout: infinity,
     check_origin: false
   # transport :longpoll, Phoenix.Transports.LongPoll
 
