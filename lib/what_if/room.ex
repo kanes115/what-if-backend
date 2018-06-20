@@ -128,7 +128,7 @@ defmodule WhatIf.Room do
   end
 
   # qa: list of lists
-  defp mix_qa([head | _] = qa) do
+  defp mix_qa(qa) do
     qa
     |> transpose()
     |> Enum.map(fn l -> shuffle_answers(l) end)
