@@ -28,7 +28,7 @@ defmodule WhatIf.RoomChannel do
     case maybe_room do
       {:error, reason} -> 
         IO.puts "Tried to remove user from room but it already did not exist"
-        IO.inpect reason
+        IO.inspect reason
         # This whole clause probably unnecessary but let's log if this
         # situation happens ever
         :ok
@@ -68,12 +68,13 @@ defmodule WhatIf.RoomChannel do
     {:noreply, socket}
   end
   def handle_in("add_question", %{"question" => question} = body, socket) do
+    user_id = socket.assigns.user_id
     res = socket
     |> get_room_pid() 
-    |> Room.add_question(question)
+    |> Room.add_question(user_id, question)
     case res do
-      {:error, _} ->
-        push socket, "error", %{"reason" => "game has already started"}
+      {:error, reason} ->
+        push socket, "error", %{"reason" => reason_to_msg(reason)}
       _ ->
         broadcast! socket, "new_question", body
     end
@@ -104,6 +105,8 @@ defmodule WhatIf.RoomChannel do
     {:noreply, socket}
   end
 
+  defp reason_to_msg(:user_ready), do: "You cannot add questions in ready state"
+  defp reason_to_msg(:game_has_already_started), do: "Game has already started"
 
   defp get_room_name(%{topic: "room:" <> room_name}), do: room_name
 

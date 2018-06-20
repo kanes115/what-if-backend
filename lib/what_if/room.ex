@@ -22,7 +22,7 @@ defmodule WhatIf.Room do
 
   def get_users(pid), do: GenServer.call(pid, :get_users)
 
-  def add_question(pid, question), do: GenServer.call(pid, {:add_question, question})
+  def add_question(pid, user_id, question), do: GenServer.call(pid, {:add_question, user_id, question})
 
   def get_questions(pid), do: GenServer.call(pid, :get_questions)
 
@@ -102,12 +102,17 @@ defmodule WhatIf.Room do
         {:reply, {:ok, :game_started}, %{state | users: new_users, started?: true}}
     end
   end
-  def handle_call({:add_question, question}, _from, 
+  def handle_call({:add_question, user_id, question}, _from, 
                   %{questions: questions, started?: false} = state) do
     IO.inspect "Adding question #{inspect(question)} to room #{inspect(state.room_name)}"
     case state.started? do
       false ->
-        {:reply, :ok, %{state | questions: questions ++ [question]}}
+        case user_ready?(user_id, state.users) do
+          true ->
+            {:reply, {:error, :user_ready}, state}
+          false ->
+            {:reply, :ok, %{state | questions: questions ++ [question]}}
+        end
       true ->
         IO.inspect "... but game has already started"
         {:reply, {:error, :game_already_started}, state}
@@ -116,7 +121,12 @@ defmodule WhatIf.Room do
   def handle_call(:get_questions, _from, %{questions: q} = state), do: {:reply, q, state}
 
   ## Helpers
-  #
+
+  defp user_ready?(user_id, users) do
+    [user] = users |> Enum.filter(fn %{user: u} -> user_id == u.user_id end)
+    user.ready?
+  end
+
   defp game_finished?(users) do
     users
     |> Enum.all?(fn %{q_and_a: e} -> e !== nil end)
