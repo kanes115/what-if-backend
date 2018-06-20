@@ -63,7 +63,8 @@ defmodule WhatIf.Room do
       false ->
         {:reply, {:ok, :game_not_finished}, %{state | users: new_users}}
       true ->
-        {:reply, {:ok, :game_finished, get_all_q_and_as(new_users)}, %{state | users: new_users}}
+        all_qa = get_all_q_and_as(new_users)
+        {:reply, {:ok, :game_finished, mix_qa(all_qa)}, %{state | users: new_users}}
     end
   end
   def handle_call(:started?, _from, state) do
@@ -125,6 +126,33 @@ defmodule WhatIf.Room do
     users
     |> Enum.map(fn %{q_and_a: a} -> a end)
   end
+
+  # qa: list of lists
+  defp mix_qa(qa) do
+    qa
+    |> transpose()
+    |> Enum.map(fn l -> shuffle_answers(l) end)
+    |> transpose()
+    |> List.flatten()
+  end
+
+  defp transpose([]), do: []
+  defp transpose([[]|_]), do: []
+  defp transpose(a) do
+    [Enum.map(a, &hd/1) | transpose(Enum.map(a, &tl/1))]
+  end
+
+  defp shuffle_answers(qas) do
+    q = qas
+        |> Enum.map(fn %{"question" => q} -> q end)
+    a = qas
+        |> Enum.map(fn %{"answer" => a} -> a end)
+        |> Enum.shuffle()
+    q
+    |> Enum.zip(a)
+    |> Enum.map(fn {q, a} -> %{"question" => q, "answer" => a} end)
+  end
+
 
   defp remove_room_if_empty([], _), do: {:stop, :normal, nil}
   defp remove_room_if_empty(_, new_state), do: {:reply, :ok, new_state}
