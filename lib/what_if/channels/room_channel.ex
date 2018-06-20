@@ -22,13 +22,25 @@ defmodule WhatIf.RoomChannel do
     {:ok, socket}
   end
 
-  def terminate({:shutdown, _}, socket) do
-    room = socket
+  def terminate({:shutdown, :left}, socket) do
+    maybe_room = socket
            |> get_room_pid() 
-    user_id = socket.assigns.user_id
-    joined_user = User.get_user_by_id(user_id)
-    Room.delete_user(room, user_id)
-    broadcast! socket, "user_left", %{"user_id" => joined_user.user_id}
+    case maybe_room do
+      {:error, reason} -> 
+        IO.puts "Tried to remove user from room but it already did not exist"
+        IO.inpect reason
+        # This whole clause probably unnecessary but let's log if this
+        # situation happens ever
+        :ok
+      room ->
+        user_id = socket.assigns.user_id
+        joined_user = User.get_user_by_id(user_id)
+        Room.delete_user(room, user_id)
+        broadcast! socket, "user_left", %{"user_id" => joined_user.user_id}
+        {:noreply, socket}
+    end
+  end
+  def terminate({:shutdown, :closed}, socket) do
     {:noreply, socket}
   end
 
@@ -96,10 +108,16 @@ defmodule WhatIf.RoomChannel do
   defp get_room_name(%{topic: "room:" <> room_name}), do: room_name
 
   defp get_room_pid(socket) do
-    {:ok, pid} = socket
+    res = socket
     |> get_room_name() 
     |> RoomsManager.get_room_by_name()
-    pid
+    case res do
+      {:error, :not_exists} = e ->
+        IO.puts "Tried to connect to room that does not exist"
+        e
+      {:ok ,pid} ->
+        pid
+    end
   end
 
 
