@@ -129,12 +129,17 @@ defmodule WhatIf.Room do
 
   # qa: list of lists
   defp mix_qa([head | _] = qa) do
-    IO.inspect qa
-    a = for x <- 0..length(head) - 1, do: Enum.map(qa, fn l -> Enum.at(l, x) end) 
-    b = a |> Enum.map(fn l -> shuffle_answers(l) end)
-    res = for x <- 0..length(qa) - 1, do: Enum.map(b, fn l -> Enum.at(l, x) end) 
-    res
+    qa
+    |> transpose()
+    |> Enum.map(fn l -> shuffle_answers(l) end)
+    |> transpose()
     |> List.flatten()
+  end
+
+  defp transpose([]), do: []
+  defp transpose([[]|_]), do: []
+  defp transpose(a) do
+    [Enum.map(a, &hd/1) | transpose(Enum.map(a, &tl/1))]
   end
 
   defp shuffle_answers(qas) do
