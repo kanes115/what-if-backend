@@ -1,5 +1,6 @@
 defmodule WhatIf.Room do
   use GenServer
+  require Logger
 
   alias WhatIf.User
 
@@ -36,7 +37,7 @@ defmodule WhatIf.Room do
 
   @impl true
   def init(name) do
-    IO.inspect "Starting room #{inspect(name)}"
+    Logger.info "Starting room #{inspect(name)}"
     {:ok, %__MODULE__{room_name: name}}
   end
 
@@ -91,20 +92,27 @@ defmodule WhatIf.Room do
     {:reply, users_names, state}
   end
   def handle_call({:set_user_ready, user_id}, _from, %{users: users, started?: false} = state) do
-    IO.inspect "Setting user #{inspect(user_id)} ready in room #{inspect(state.room_name)}"
     new_users = users |> Enum.map(fn %{user: %{user_id: ^user_id}} = entry -> 
       %{entry | ready?: true}
       u -> u end)
-    case all_ready?(new_users) do
-      false ->
-        {:reply, :ok, %{state | users: new_users}}
+    case any_questions_posted?(state) do
       true ->
-        {:reply, {:ok, :game_started}, %{state | users: new_users, started?: true}}
+        Logger.info "Setting user #{inspect(user_id)} ready in room #{inspect(state.room_name)}"
+        case all_ready?(new_users) do
+          false ->
+            {:reply, :ok, %{state | users: new_users}}
+          true ->
+            {:reply, {:ok, :game_started}, %{state | users: new_users, started?: true}}
+        end
+      false ->
+        Logger.debug "User #{inspect(user_id)} wanted to set ready 
+        in room #{inspect(state.room_name)} but no questions are posted"
+        {:reply, {:error, :no_questions_added}, state}
     end
   end
   def handle_call({:add_question, user_id, question}, _from, 
                   %{questions: questions, started?: false} = state) do
-    IO.inspect "Adding question #{inspect(question)} to room #{inspect(state.room_name)}"
+    Logger.info "Adding question #{inspect(question)} to room #{inspect(state.room_name)}"
     case state.started? do
       false ->
         case user_ready?(user_id, state.users) do
@@ -114,13 +122,18 @@ defmodule WhatIf.Room do
             {:reply, :ok, %{state | questions: questions ++ [question]}}
         end
       true ->
-        IO.inspect "... but game has already started"
+        Logger.warn "... but game has already started"
         {:reply, {:error, :game_already_started}, state}
     end
   end
   def handle_call(:get_questions, _from, %{questions: q} = state), do: {:reply, q, state}
 
   ## Helpers
+
+  defp any_questions_posted?(state) do
+    length(state.questions) > 0
+  end
+
 
   defp user_ready?(user_id, users) do
     [user] = users |> Enum.filter(fn %{user: u} -> user_id == u.user_id end)
