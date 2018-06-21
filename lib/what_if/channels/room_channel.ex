@@ -1,5 +1,6 @@
 defmodule WhatIf.RoomChannel do
   use Phoenix.Channel
+  require Logger
 
   alias WhatIf.User
   alias WhatIf.Room
@@ -27,8 +28,8 @@ defmodule WhatIf.RoomChannel do
            |> get_room_pid() 
     case maybe_room do
       {:error, reason} -> 
-        IO.puts "Tried to remove user from room but it already did not exist"
-        IO.inspect reason
+        Logger.warn "Tried to remove user from room but 
+        it already did not exist (#{inspect(reason)})"
         # This whole clause probably unnecessary but let's log if this
         # situation happens ever
         :ok
@@ -58,6 +59,9 @@ defmodule WhatIf.RoomChannel do
     |> get_room_pid() 
     |> Room.set_user_ready(user_id)
     case res do
+      {:error, reason} ->
+        Logger.debug "Can't set ready for reason: #{inspect(reason)}"
+        push socket, "error", %{"reason" => reason}
       :ok ->
         broadcast! socket, "ready", %{"user_id" => user.user_id,
                                       "game_started" => false}
@@ -116,7 +120,7 @@ defmodule WhatIf.RoomChannel do
     |> RoomsManager.get_room_by_name()
     case res do
       {:error, :not_exists} = e ->
-        IO.puts "Tried to connect to room that does not exist"
+        Logger.warn "Tried to connect to room that does not exist"
         e
       {:ok ,pid} ->
         pid
