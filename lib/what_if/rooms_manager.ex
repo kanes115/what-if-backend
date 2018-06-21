@@ -22,13 +22,14 @@ defmodule WhatIf.RoomsManager do
 
   @spec add_room(String.t) :: {:error, :exists} | :ok
   def add_room(name) do
-    case room_exists?(name) do
-      true ->
-        {:error, :exists}
+    case name_valid?(name) do
       false ->
-        GenServer.call(__MODULE__, {:add_room, name})
+        {:error, :name_invalid}
+      true ->
+        create_with_valid_name(name)
     end
   end
+
 
   ## probably unnecessary
   def delete_room(name) do
@@ -88,6 +89,22 @@ defmodule WhatIf.RoomsManager do
   end
   
   ## Helpers
+
+  defp name_valid?(""), do: false
+  defp name_valid?(name) do
+    String.length(name) < 16
+    and String.trim(name) == name
+    and not String.contains?(name, "  ")
+  end
+
+  defp create_with_valid_name(name) do
+    case room_exists?(name) do
+      true ->
+        {:error, :exists}
+      false ->
+        GenServer.call(__MODULE__, {:add_room, name})
+    end
+  end
 
   defp room_exists?(name) do
     get_all_rooms()
