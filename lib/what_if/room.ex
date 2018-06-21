@@ -43,11 +43,11 @@ defmodule WhatIf.Room do
 
   @impl true
   def terminate(:normal, %{room_name: name}) do
-    IO.inspect "Stopping room #{inspect(name)} (normally)"
+    Logger.info "Stopping room #{inspect(name)} (normally)"
     inform_users(name, "Room was deleted")
   end
   def terminate(_reason, %{room_name: name}) do
-    IO.inspect "Stopping room #{inspect(name)} (abnormally)"
+    Logger.error "Stopping room #{inspect(name)} (abnormally)"
     inform_users(name, "Internal error")
   end
 
@@ -72,13 +72,13 @@ defmodule WhatIf.Room do
     {:reply, state.started?, state}
   end
   def handle_call({:add_user, user}, _from, state) do
-    IO.inspect "Adding user #{inspect(user)} to room #{inspect(state.room_name)}"
+    Logger.info "Adding user #{inspect(user)} to room #{inspect(state.room_name)}"
     new_state = %{state | users: state.users ++ [%{q_and_a: nil, ready?: false, user: user}]}
     {:reply, :ok, new_state}
   end
   def handle_call(:get_name, _from, %{room_name: name} = state), do: {:reply, name, state}
   def handle_call({:delete_user, to_del}, _from, %{users: users} = state) do
-    IO.inspect "Deleting user #{inspect(to_del)} from room #{inspect(state.room_name)}"
+    Logger.info "Deleting user #{inspect(to_del)} from room #{inspect(state.room_name)}"
     case user_in_room?(to_del, users) do
       true ->
         remove_room_if_empty(users, %{ state | users: remove_user(to_del, users)})
