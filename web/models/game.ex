@@ -1,10 +1,12 @@
 defmodule WhatIf.Game do
   use Ecto.Schema
 
+  @primary_key {:game_id, :id, autogenerate: true}
   schema "games" do
     field :room_name, :string
 
-    belongs_to :user, WhatIf.User, foreign_key: :token
+    many_to_many :user, WhatIf.User,
+      join_through: "users_games", join_keys: [game_id: :game_id, user_id: :user_id]
 
     timestamps()
   end
