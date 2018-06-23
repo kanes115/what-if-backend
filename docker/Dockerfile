@@ -1,7 +1,7 @@
 FROM phusion/baseimage
 
 ENV VSN=master \
-    BUILD_DEPS="git make gcc wget erlang-dev erlang-parsetools elixir npm" \
+    BUILD_DEPS="git make gcc wget esl-erlang=1:20.3 elixir=1.6.5-1 npm" \
     PORT="80" \
     HOST="ec2-18-219-114-131.us-east-2.compute.amazonaws.com" \
     RELEASE_PATH=/usr/lib/what-if-backend
@@ -15,6 +15,8 @@ RUN curl -O https://packages.erlang-solutions.com/erlang-solutions_1.0_all.deb &
     apt-get update && \
     apt-get install -y ${BUILD_DEPS} ${RUN_DEPS} && \
     apt-get install -y libtool autoconf tree && \
+    echo "ERLANG VERSION: " && \
+    erl -eval 'erlang:display(erlang:system_info(otp_release)), halt().'  -noshell && \
     mix local.hex --force && \
     mix local.rebar --force && \
     git clone https://github.com/kanes115/what-if-backend.git --branch ${VSN} && \
