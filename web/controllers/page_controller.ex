@@ -41,9 +41,14 @@ defmodule WhatIf.PageController do
   def get_game_details(conn, %{"game_id" => game_id}) do
     fun = fn _user_id ->
       game = WhatIf.Game.get_game_by_id(game_id)
-      users = game.users
-              |> Enum.map(fn %{display_name: name} -> name end)
-      {200, %{"q_and_a" => game.questions, "players" => users}}
+      case game do
+        nil ->
+          {404, "Game not found"}
+        _ ->
+          users = game.users
+                  |> Enum.map(fn %{display_name: name} -> name end)
+          {200, %{"q_and_a" => game.questions, "players" => users}}
+      end
     end
     maybe_do(conn, fun)
   end
