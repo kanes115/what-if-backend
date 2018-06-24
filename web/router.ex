@@ -23,6 +23,9 @@ defmodule WhatIf.Router do
 
     get "/test", PageController, :test, private: %{joken_skip: true}
 
+    get "/games", PageController, :get_games, private: %{joken_skip: true}
+    get "/game/:game_id", PageController, :get_game_details,  private: %{joken_skip: true}
+
     post "/display-name", PageController, :set_display_name, private: %{joken_skip: true}
   end
 

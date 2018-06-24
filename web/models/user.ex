@@ -6,7 +6,8 @@ defmodule WhatIf.User do
   @primary_key {:user_id, :string, autogenerate: false}
   schema "users" do
     field :display_name, :string
-    has_many :games, WhatIf.Game
+    many_to_many :games, WhatIf.Game,
+      join_through: "users_games", join_keys: [user_id: :user_id, game_id: :game_id]
 
     timestamps()
   end
@@ -40,6 +41,7 @@ defmodule WhatIf.User do
     Repo.get_by(__MODULE__, email: email)
   end
 
-  def in_room?(user), do: false # todo
+  def in_room?(_user), do: false # todo
+  
 
 end
