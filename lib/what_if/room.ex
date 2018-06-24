@@ -3,6 +3,7 @@ defmodule WhatIf.Room do
   require Logger
 
   alias WhatIf.User
+  alias WhatIf.Repo
 
   @enforce_keys [:room_name]
   defstruct [:room_name, {:users, []}, {:questions, []}, {:started?, false}]
@@ -33,6 +34,10 @@ defmodule WhatIf.Room do
     GenServer.call(pid, {:submit_answers, q_and_a, user_id})
   end
 
+  def persist(pid, final_qa) do
+    GenServer.call(pid, {:persist, final_qa})
+  end
+
   ## GenServer callbacks
 
   @impl true
@@ -57,7 +62,7 @@ defmodule WhatIf.Room do
       case user.user_id do
         ^user_id ->
           %{entry | q_and_a: q_and_a}
-        e -> entry
+        _ -> entry
       end
     end)
     case game_finished?(new_users) do
@@ -127,6 +132,15 @@ defmodule WhatIf.Room do
     end
   end
   def handle_call(:get_questions, _from, %{questions: q} = state), do: {:reply, q, state}
+  def handle_call({:persist, final_qa}, _from, %{users: users} = state) do
+    Logger.info "Persisting #{inspect(final_qa)}"
+    ecto_users = Enum.map(users, fn %{user: user} -> user end)
+    game = %{room_name: state.room_name, questions: inspect(final_qa), users: ecto_users}
+    changeset = WhatIf.Game.changeset(%WhatIf.Game{}, game)
+    Repo.insert!(changeset) 
+    {:reply, :ok, state}
+  end
+
 
   ## Helpers
 

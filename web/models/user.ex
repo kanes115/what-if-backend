@@ -41,6 +41,7 @@ defmodule WhatIf.User do
     Repo.get_by(__MODULE__, email: email)
   end
 
-  def in_room?(user), do: false # todo
+  def in_room?(_user), do: false # todo
+  
 
 end
