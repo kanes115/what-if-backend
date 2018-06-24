@@ -34,8 +34,9 @@ defmodule WhatIf.Room do
     GenServer.call(pid, {:submit_answers, q_and_a, user_id})
   end
 
-  def persist(pid, final_qa) do
+  def persist_and_stop(pid, final_qa) do
     GenServer.call(pid, {:persist, final_qa})
+    GenServer.stop(pid)
   end
 
   ## GenServer callbacks

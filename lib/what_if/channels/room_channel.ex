@@ -104,8 +104,7 @@ defmodule WhatIf.RoomChannel do
       {:ok, :game_finished, final_q_and_a} ->
         Logger.info "Game has finished"
         room_pid = socket |> get_room_pid()
-        Room.persist(room_pid, final_q_and_a)
-        # TODO close room
+        Room.persist_and_stop(room_pid, final_q_and_a)
         broadcast! socket, "player_finished", %{"user_id" => socket.assigns.user_id,
                                                "game_finished" => true,
                                                "q_and_a" => final_q_and_a}
