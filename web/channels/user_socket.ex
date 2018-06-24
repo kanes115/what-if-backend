@@ -25,6 +25,7 @@ defmodule WhatIf.UserSocket do
   def connect(%{"token" => token}, socket) do
     {:ok, assign(socket, :user_id, WhatIf.User.get_user_id(token))}
   end
+  def connect(_, _), do: :error
 
   # Socket id's are topics that allow you to identify all sockets for a given user:
   #
