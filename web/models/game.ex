@@ -37,6 +37,7 @@ defmodule WhatIf.Game do
 
   def get_game_by_id(game_id) do
     Repo.get_by(__MODULE__, game_id: game_id)
+    |> Repo.preload(:users)
   end
 
 end
