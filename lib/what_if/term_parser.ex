@@ -1,4 +1,4 @@
-defmodule TermParser do
+defmodule WhatIf.TermParser do
   def parse(str) when is_binary(str)do
     case str |> Code.string_to_quoted do
       {:ok, terms} -> hydrate_terms(terms)
