@@ -4,12 +4,10 @@ defmodule WhatIf.Router do
   import Joken
 
   pipeline :browser do
-    #plug :accepts, ["html", "json"]
+    plug :verify_jwt
     plug :fetch_session
     plug :fetch_flash
-    #plug :protect_from_forgery
     plug :put_secure_browser_headers
-    plug Joken.Plug, verify: &__MODULE__.verify_function/0
   end
 
   pipeline :api do
@@ -21,24 +19,37 @@ defmodule WhatIf.Router do
 
     get "/", PageController, :index, private: %{joken_skip: true}
 
-    get "/test", PageController, :test, private: %{joken_skip: true}
+    get "/test", PageController, :test
 
-    get "/games", PageController, :get_games, private: %{joken_skip: true}
-    get "/game/:game_id", PageController, :get_game_details,  private: %{joken_skip: true}
+    get "/games", PageController, :get_games
+    get "/game/:game_id", PageController, :get_game_details
 
-    post "/display-name", PageController, :set_display_name, private: %{joken_skip: true}
+    post "/display-name", PageController, :set_display_name
   end
 
-  def verify_function() do
-    key = JOSE.JWK.from_pem_file("cert.pem")
-    IO.puts "plug turned on"
-    res = %Joken.Token{}
-    |> Joken.with_signer(rs256(key))
-    IO.inspect res
-    res
+  def verify_jwt(conn, opts) do
+    case Plug.Conn.get_req_header(conn, "authorization") do
+      ["Bearer " <> token] ->
+        case WhatIf.FirebaseVeryfier.verify_jwt(token) do
+          {true, user_id} ->
+            assign(conn, :user_id, user_id)
+          _ ->
+            conn |> unauthorized
+        end
+      _ ->
+        conn |> unauthorized
+    end
   end
 
-  # Other scopes may use custom stacks.
+  defp unauthorized(conn) do
+    conn
+        |> put_status(403)
+        |> send_resp(403, "Unauthorized")
+        |> halt
+  end
+
+
+    # Other scopes may use custom stacks.
   # scope "/api", WhatIf do
   #   pipe_through :api
   # end
