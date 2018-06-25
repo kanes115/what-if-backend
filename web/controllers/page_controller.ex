@@ -12,7 +12,9 @@ defmodule WhatIf.PageController do
   end
 
   def set_display_name(conn, %{"name" => name}) do
+    IO.puts "Hello"
     fun = fn user_id ->
+      IO.inspect user_id
       register(user_id, name, conn)
       {201, "ok"}
     end
@@ -56,7 +58,7 @@ defmodule WhatIf.PageController do
     maybe_do(conn, fun)
   end
 
-  defp maybe_do(%{user_id: user_id} = conn, fun) do
+  defp maybe_do(%{assigns: %{user_id: user_id}} = conn, fun) do
     {code, response} = fun.(user_id)
     case is_map(response) do
       true ->
@@ -68,6 +70,7 @@ defmodule WhatIf.PageController do
     end
   end
   defp maybe_do(conn, _) do
+    IO.inspect conn
     conn |> put_status(401) |> send_resp(401, "Unauthorized") |> halt
   end
 end

@@ -23,8 +23,13 @@ defmodule WhatIf.UserSocket do
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
   # We check if there is a token
-  def connect(%{"token" => _token}, socket) do
-    {:ok, socket}
+  def connect(%{"token" => token}, socket) do
+    case WhatIf.FirebaseVeryfier.verify_jwt(token) do
+      {true, user_id} ->
+        {:ok, assign(socket, :user_id, user_id)}
+      _ ->
+        :error
+    end
   end
   def connect(_, _), do: :error
 
