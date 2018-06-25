@@ -97,26 +97,18 @@ defmodule WhatIf.PageController do
     maybe_do(conn, fun)
   end
 
-  defp maybe_do(conn, fun) do
-    case get_req_header(conn, "authorization") do
-      ["Bearer " <> token] ->
-        user_id = WhatIf.User.get_user_id(token)
-        {code, response} = fun.(user_id)
-        case is_map(response) do
-          true ->
-            json conn, response
-          false ->
-            conn
-            |> put_status(code)
-            |> send_resp(code, response)
-        end
-      _ ->
+  defp maybe_do(%{user_id: user_id} = conn, fun) do
+    {code, response} = fun.(user_id)
+    case is_map(response) do
+      true ->
+        json conn, response
+      false ->
         conn
-        |> put_status(403)
-        |> send_resp(403, "Unauthorized")
-        |> halt
+        |> put_status(code)
+        |> send_resp(code, response)
     end
   end
-
-  
+  defp maybe_do(conn, _) do
+    conn |> put_status(401) |> send_resp(401, "Unauthorized") |> halt
+  end
 end

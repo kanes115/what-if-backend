@@ -22,8 +22,9 @@ defmodule WhatIf.UserSocket do
   #
   # See `Phoenix.Token` documentation for examples in
   # performing token verification on connect.
-  def connect(%{"token" => token}, socket) do
-    {:ok, assign(socket, :user_id, WhatIf.User.get_user_id(token))}
+  # We check if there is a token
+  def connect(%{"token" => _token}, socket) do
+    {:ok, socket}
   end
   def connect(_, _), do: :error
 
