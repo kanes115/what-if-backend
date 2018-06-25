@@ -31,8 +31,18 @@ defmodule WhatIf.FirebaseVeryfier do
   end
 
   defp get_public_keys() do
-    {:ok, {{_, 200, _}, _, body}} = :httpc.request(:get, {'https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com', []}, [autoredirect: true], [])
-    JOSE.JWK.from_firebase(IO.iodata_to_binary(body))
+    url = 'https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com'
+    case HTTPoison.get(url) do
+      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
+        IO.puts body
+        JOSE.JWK.from_firebase(IO.iodata_to_binary(body))
+      {:ok, %HTTPoison.Response{status_code: 404}} ->
+        IO.puts "Not found :("
+      {:error, %HTTPoison.Error{reason: reason}} ->
+        IO.inspect reason
+    end
+    #{:ok, {{_, 200, _}, _, body}} = :httpc.request(:get, {'https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com', []}, [autoredirect: true], [])
+    #JOSE.JWK.from_firebase(IO.iodata_to_binary(body))
   end
 
 
